@@ -2,6 +2,7 @@ from celery import shared_task
 import requests
 from bs4 import BeautifulSoup
 from .models import JobOffer
+from celery.signals import worker_ready
 
 @shared_task
 def fetch_justjoin_offers(keyword="Python"):
@@ -39,3 +40,7 @@ def fetch_justjoin_offers(keyword="Python"):
             print(f"Błąd przy ofercie: {e}")
 
     print(f"Pobrano {len(offers_html)} ofert dla keyword={keyword}")
+    
+@worker_ready.connect
+def fetch_offers_at_start(sender=None, **kwargs):
+    fetch_justjoin_offers.delay()
