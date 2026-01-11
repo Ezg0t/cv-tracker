@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Twoje aplikacje</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .top-buttons {
+            margin-bottom: 20px;
+        }
+        button, .link-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        button:hover, .link-button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #eee;
+        }
+        tr.status-sent {
+            background-color: #d3d3d3; /* szary */
+        }
+        tr.status-review {
+            background-color: #fff176; /* żółty */
+        }
+        tr.status-interview {
+            background-color: #81d4fa; /* jasnoniebieski */
+        }
+        tr.status-offer {
+            background-color: #a5d6a7; /* zielony */
+        }
+        tr.status-rejected {
+            background-color: #ef9a9a; /* czerwony */
+        }
+        form {
+            display: inline;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Twoje aplikacje</h1>
+
+    <div class="top-buttons">
+        <a href="{% url 'job_offers:list' %}" class="link-button">Przejdź do ofert pracy</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Firma</th>
+                <th>Stanowisko</th>
+                <th>Status</th>
+                <th>Wysłano</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in apps %}
+            <tr class="
+                {% if app.status == 'sent' %}status-sent
+                {% elif app.status == 'review' %}status-review
+                {% elif app.status == 'interview' %}status-interview
+                {% elif app.status == 'offer' %}status-offer
+                {% elif app.status == 'rejected' %}status-rejected{% endif %}">
+                
+                <td>{{ app.company }}</td>
+                <td>{{ app.position }}</td>
+                <td>
+                    <form action="{% url 'applications:change_status' app.pk %}" method="post">
+                        {% csrf_token %}
+                        <select name="status">
+                            {% for code, label in app.STATUS_CHOICES %}
+                                <option value="{{ code }}" {% if app.status == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Zmień</button>
+                    </form>
+                </td>
+                <td>{{ app.created_at|date:"Y-m-d" }}</td>
+                <td>
+                    <form action="{% url 'applications:delete' app.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" style="background-color:#dc3545;">Usuń</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">Brak aplikacji</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

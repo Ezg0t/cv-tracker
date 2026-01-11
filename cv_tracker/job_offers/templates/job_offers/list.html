@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Oferty pracy</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .top-buttons {
+            margin-bottom: 20px;
+        }
+        button, .link-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+        button:hover, .link-button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #aaa;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #eee;
+        }
+        /* kolory wierszy wg statusu */
+        tr.status-new {
+            background-color: #d3d3d3; /* szary */
+        }
+        tr.status-checked {
+            background-color: #fff176; /* żółty */
+        }
+        tr.status-sent {
+            background-color: #a5d6a7; /* zielony */
+        }
+        form {
+            display: inline;
+            margin: 0;
+        }
+        /* ikonka linku */
+        .link-icon {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Oferty pracy</h1>
+
+    <div class="top-buttons">
+        <a href="{% url 'applications:list' %}" class="link-button">Przejdź do aplikacji</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Tytuł</th>
+                <th>Firma</th>
+                <th>Lokalizacja</th>
+                <th>Link</th>
+                <th>Status</th>
+                <th>Data dodania</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for offer in offers %}
+            <tr class="{% if offer.status == 'NEW' %}status-new{% elif offer.status == 'CHECKED' %}status-checked{% elif offer.status == 'SENT' %}status-sent{% endif %}">
+                <td>{{ offer.title }}</td>
+                <td>{{ offer.company_name }}</td>
+                <td>{{ offer.location }}</td>
+                <td>
+                    <a href="{{ offer.url }}" target="_blank">
+                        LINK
+                    </a>
+                </td>
+                <td>
+                    <form action="{% url 'job_offers:change_status' offer.pk %}" method="post">
+                        {% csrf_token %}
+                        <select name="status">
+                            {% for code, label in offer.STATUS_CHOICES %}
+                                <option value="{{ code }}" {% if offer.status == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Zmień</button>
+                    </form>
+                </td>
+                <td>{{ offer.created_at }}</td>
+                  <td>
+            <form action="{% url 'job_offers:add_application' offer.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="link-button">DODAJ APLIKACJĘ</button>
+            </form>
+        </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">Brak ofert</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -179,3 +179,12 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
+# Django media / upload
+media/
+
+# Docker / Compose
+docker-compose.override.yml
+
+# VSCode / IDE
+.vscode/
